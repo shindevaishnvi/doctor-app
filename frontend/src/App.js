@@ -12,10 +12,11 @@ import Contact from './pages/Contact'
 import Footer from './components/Footer'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import Chatbot from './components/Chatbot'
 
 const App = () => {
   return (
-    <div className='mx-4 sm:mx-[10%]'>
+    <div className='mx-4 sm:mx-[10%] relative min-h-screen'>
       <ToastContainer />
       <Navbar />
       <Routes>
@@ -29,11 +30,10 @@ const App = () => {
         <Route path='/my-appointments' element={<MyAppointments />} />
         <Route path='/appointment/:docId' element={<Appointment />} />
       </Routes>
+      <Chatbot />
       <Footer />
     </div>
   )
 }
-
-
 
 export default App

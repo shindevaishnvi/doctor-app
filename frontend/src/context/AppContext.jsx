@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 export const AppContext = createContext();
 
 const AppContextProvider = (props) => {
-    const currencySymbol = '$';
+    const currencySymbol = '₹';
     const backendUrl = "http://localhost:5000";
 
     const [doctors, setDoctors] = useState([]);

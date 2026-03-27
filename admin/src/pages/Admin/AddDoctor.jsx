@@ -115,7 +115,7 @@ const AddDoctor = () => {
                             <div className='space-y-2'>
                                 <label className='text-xs font-bold text-gray-400 uppercase tracking-widest ml-1'>Consultation Fee</label>
                                 <div className='relative'>
-                                    <span className='absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 font-bold'>$</span>
+                                    <span className='absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 font-bold'>₹</span>
                                     <input onChange={(e) => setFees(e.target.value)} value={fees} className='w-full bg-gray-50/50 border border-gray-100 rounded-2xl py-4 pl-10 pr-6 outline-none focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all font-medium placeholder:text-gray-300' type="number" placeholder='50' required />
                                 </div>
                             </div>
