@@ -1,5 +1,6 @@
 import React, { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { AppContext } from '../context/AppContext'
 import { CheckCircle2, Star, ArrowRight } from 'lucide-react'
 
@@ -9,17 +10,32 @@ const TopDoctors = () => {
 
     return (
         <div className='flex flex-col items-center gap-6 my-24 px-4'>
-            <div className='text-center space-y-4 max-w-2xl'>
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className='text-center space-y-4 max-w-2xl'
+            >
                 <h1 className='text-4xl md:text-5xl font-bold text-gray-900 tracking-tight'>Top Rated <span className='text-primary'>Specialists</span></h1>
                 <p className='text-gray-500 text-lg font-medium'>Our elite team of verified medical professionals is ready to provide you with the best care possible.</p>
-            </div>
+            </motion.div>
 
-            <div className='w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8 mt-12'>
+            <motion.div 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ staggerChildren: 0.1 }}
+                className='w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8 mt-12'
+            >
                 {doctors.slice(0, 10).map((item, index) => (
-                    <div 
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        whileHover={{ y: -10 }}
+                        key={index}
                         onClick={() => { navigate(`/appointment/${item._id}`); window.scrollTo(0, 0) }} 
                         className='group bg-white rounded-3xl overflow-hidden cursor-pointer premium-shadow border border-gray-100 flex flex-col h-full'
-                        key={index}
                     >
                         <div className='relative overflow-hidden aspect-[4/5] bg-slate-50'>
                             <img className='w-full h-full object-cover group-hover:scale-110 transition-transform duration-700' src={item.image} alt={item.name} />
@@ -61,24 +77,33 @@ const TopDoctors = () => {
                                     <p className='text-[10px] text-gray-400 font-bold uppercase'>Consultation</p>
                                     <p className='text-lg font-bold text-gray-900'>{currencySymbol}{item.fees}</p>
                                 </div>
-                                <button className='bg-primary/5 hover:bg-primary hover:text-white text-primary p-3 rounded-xl transition-all'>
+                                <motion.button 
+                                    whileTap={{ scale: 0.9 }}
+                                    className='bg-primary/5 hover:bg-primary hover:text-white text-primary p-3 rounded-xl transition-all'
+                                >
                                     <CheckCircle2 size={20} />
-                                </button>
+                                </motion.button>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 ))}
-            </div>
+            </motion.div>
 
-            <button 
+            <motion.button 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => { navigate('/doctors'); window.scrollTo(0, 0) }} 
-                className='mt-16 btn-premium px-12 py-4 flex items-center gap-3 active:scale-95 group'
+                className='mt-16 btn-premium px-12 py-4 flex items-center gap-3 group'
             >
                 View Full Medical Directory
                 <ArrowRight size={20} className='group-hover:translate-x-1 transition-transform' />
-            </button>
+            </motion.button>
         </div>
     )
 }
 
 export default TopDoctors
+

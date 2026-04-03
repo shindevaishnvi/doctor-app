@@ -14,6 +14,7 @@ import Login from './pages/Login'
 import DoctorDashboard from './pages/Doctor/DoctorDashboard'
 import DoctorAppointments from './pages/Doctor/DoctorAppointments'
 import DoctorProfile from './pages/Doctor/DoctorProfile'
+import VideoCall from './pages/VideoCall'
 
 const App = () => {
   const { aToken } = useContext(AdminContext)
@@ -37,6 +38,7 @@ const App = () => {
           <Route path='/doctor-dashboard' element={<DoctorDashboard />} />
           <Route path='/doctor-appointments' element={<DoctorAppointments />} />
           <Route path='/doctor-profile' element={<DoctorProfile />} />
+          <Route path='/video-call/:id' element={<VideoCall />} />
         </Routes>
       </div>
     </div>

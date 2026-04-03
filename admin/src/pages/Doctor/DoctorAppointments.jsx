@@ -1,9 +1,11 @@
 import React, { useContext, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { DoctorContext } from '../../context/DoctorContext'
 import { AppContext } from '../../context/AppContext'
-import { CheckCircle, XCircle } from 'lucide-react'
+import { CheckCircle, XCircle, Video } from 'lucide-react'
 
 const DoctorAppointments = () => {
+  const navigate = useNavigate()
 
   const { dToken, appointments, getAppointments, completeAppointment, cancelAppointment } = useContext(DoctorContext)
   const { calculateAge, slotDateFormat, currency } = useContext(AppContext)
@@ -65,6 +67,9 @@ const DoctorAppointments = () => {
                       : item.isCompleted
                         ? <span className='px-3 py-1 rounded-lg bg-emerald-50 text-emerald-500 text-[10px] font-black uppercase tracking-widest'>Completed</span>
                         : <div className='flex items-center gap-2'>
+                          <div onClick={() => navigate(`/video-call/${item._id}`)} className='group p-2.5 rounded-xl bg-green-50 hover:bg-green-500 text-green-500 hover:text-white cursor-pointer transition-all'>
+                            <Video size={18} />
+                          </div>
                           <div onClick={() => cancelAppointment(item._id)} className='group p-2.5 rounded-xl bg-gray-50 hover:bg-red-500 text-gray-400 hover:text-white cursor-pointer transition-all'>
                             <XCircle size={18} className='group-hover:rotate-90 transition-transform duration-300' />
                           </div>

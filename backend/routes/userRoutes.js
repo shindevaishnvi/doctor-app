@@ -1,5 +1,5 @@
 const express = require("express");
-const { registerUser, loginUser, getProfile, bookAppointment, listAppointment, cancelAppointment, updateProfile } = require("../controllers/userController.js");
+const { registerUser, loginUser, getProfile, bookAppointment, listAppointment, cancelAppointment, updateProfile, paymentRazorpay, verifyRazorpay } = require("../controllers/userController.js");
 const authUser = require("../middlewares/authUser.js");
 const upload = require("../middlewares/multer.js");
 
@@ -12,6 +12,8 @@ userRouter.post("/book-appointment", authUser, bookAppointment);
 userRouter.post("/update-profile", authUser, upload.single('image'), updateProfile);
 userRouter.get("/appointments", authUser, listAppointment);
 userRouter.post("/cancel-appointment", authUser, cancelAppointment);
+userRouter.post("/payment-razorpay", authUser, paymentRazorpay);
+userRouter.post("/verify-razorpay", authUser, verifyRazorpay);
 
 module.exports = userRouter;
 

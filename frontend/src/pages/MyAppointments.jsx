@@ -3,7 +3,7 @@ import { AppContext } from '../context/AppContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
-import { CreditCard, X } from 'lucide-react'
+import { CreditCard, X, Video } from 'lucide-react'
 
 const MyAppointments = () => {
 
@@ -42,6 +42,45 @@ const MyAppointments = () => {
                 toast.error(data.message)
             }
 
+        } catch (error) {
+            console.log(error)
+            toast.error(error.message)
+        }
+    }
+
+    const initPay = (order) => {
+        const options = {
+            key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+            amount: order.amount,
+            currency: order.currency,
+            name: 'Appointment Payment',
+            description: 'Medical session booking',
+            order_id: order.id,
+            receipt: order.receipt,
+            handler: async (response) => {
+                try {
+                    const { data } = await axios.post(backendUrl + '/api/user/verify-razorpay', response, { headers: { token } })
+                    if (data.success) {
+                        toast.success(data.message)
+                        getUserAppointments()
+                        navigate('/my-appointments')
+                    }
+                } catch (error) {
+                    console.log(error)
+                    toast.error(error.message)
+                }
+            }
+        }
+        const rzp = new window.Razorpay(options)
+        rzp.open()
+    }
+
+    const appointmentRazorpay = async (appointmentId) => {
+        try {
+            const { data } = await axios.post(backendUrl + '/api/user/payment-razorpay', { appointmentId }, { headers: { token } })
+            if (data.success) {
+                initPay(data.order)
+            }
         } catch (error) {
             console.log(error)
             toast.error(error.message)
@@ -101,9 +140,19 @@ const MyAppointments = () => {
                         <div className='shrink-0 w-full md:w-auto flex flex-col gap-3'>
                             {!item.cancelled && !item.isCompleted && (
                                 <>
-                                    <button className='btn-premium !rounded-2xl !py-3 px-8 shadow-sm flex items-center justify-center gap-2 text-sm'>
-                                        <CreditCard size={18} /> Pay Online
+                                    <button onClick={() => navigate(`/video-call/${item._id}`)} className='bg-green-500 text-white font-bold px-8 py-3 rounded-2xl hover:bg-green-600 transition-all text-sm flex items-center justify-center gap-2'>
+                                        <Video size={18} /> Join Video Call
                                     </button>
+                                    {!item.payment && (
+                                        <button onClick={() => appointmentRazorpay(item._id)} className='btn-premium !rounded-2xl !py-3 px-8 shadow-sm flex items-center justify-center gap-2 text-sm'>
+                                            <CreditCard size={18} /> Pay Online
+                                        </button>
+                                    )}
+                                    {item.payment && (
+                                        <div className='px-8 py-3 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-500 text-xs font-black uppercase tracking-widest text-center'>
+                                            Paid
+                                        </div>
+                                    )}
                                     <button onClick={() => cancelAppointment(item._id)} className='bg-white text-gray-400 font-bold border border-gray-200 px-8 py-3 rounded-2xl hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all text-sm flex items-center justify-center gap-2'>
                                         <X size={18} /> Cancel
                                     </button>
