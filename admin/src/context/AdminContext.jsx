@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -10,7 +11,7 @@ const AdminContextProvider = (props) => {
     const [appointments, setAppointments] = useState([]);
     const [dashData, setDashData] = useState(false);
 
-    const backendUrl = "http://localhost:5000";
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
     const getAllDoctors = async () => {
         try {
@@ -66,6 +67,20 @@ const AdminContextProvider = (props) => {
         }
     }
 
+    const completeAppointment = async (appointmentId) => {
+        try {
+            const { data } = await axios.post(backendUrl + '/api/admin/complete-appointment', { appointmentId }, { headers: { aToken } });
+            if (data.success) {
+                toast.success(data.message);
+                getAllAppointments();
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || error.message);
+        }
+    }
+
     const getDashData = async () => {
         try {
             const { data } = await axios.get(backendUrl + '/api/admin/dashboard', { headers: { aToken } });
@@ -79,14 +94,45 @@ const AdminContextProvider = (props) => {
         }
     }
 
+    const removeDoctor = async (docId) => {
+        try {
+            const { data } = await axios.post(backendUrl + '/api/admin/remove-doctor', { docId }, { headers: { aToken } });
+            if (data.success) {
+                toast.success(data.message);
+                getAllDoctors();
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || error.message);
+        }
+    }
+
+    const updateDoctorCredentials = async (docId, email, password) => {
+        try {
+            const { data } = await axios.post(backendUrl + '/api/admin/update-doctor-credentials', { docId, email, password }, { headers: { aToken } });
+            if (data.success) {
+                toast.success(data.message);
+                getAllDoctors();
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || error.message);
+        }
+    }
+
     const value = {
         aToken, setAToken,
         backendUrl,
         doctors, getAllDoctors,
         changeAvailability,
+        removeDoctor,
+        updateDoctorCredentials,
         appointments, setAppointments,
         getAllAppointments,
         cancelAppointment,
+        completeAppointment,
         dashData, getDashData
     };
 

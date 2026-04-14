@@ -14,6 +14,11 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Chatbot from './components/Chatbot'
 import VideoCall from './pages/VideoCall'
+import MedicalRecords from './pages/MedicalRecords'
+import LiveQueue from './pages/LiveQueue'
+import SmartRecommendation from './pages/SmartRecommendation'
+import SymptomChecker from './pages/SymptomChecker'
+import HandwritingReader from './pages/HandwritingReader'
 
 const App = () => {
   return (
@@ -31,6 +36,11 @@ const App = () => {
         <Route path='/my-appointments' element={<MyAppointments />} />
         <Route path='/appointment/:docId' element={<Appointment />} />
         <Route path='/video-call/:id' element={<VideoCall />} />
+        <Route path='/medical-records' element={<MedicalRecords />} />
+        <Route path='/live-queue' element={<LiveQueue />} />
+        <Route path='/smart-recommendation' element={<SmartRecommendation />} />
+        <Route path='/symptom-checker' element={<SymptomChecker />} />
+        <Route path='/scan-prescription' element={<HandwritingReader />} />
       </Routes>
       <Chatbot />
       <Footer />

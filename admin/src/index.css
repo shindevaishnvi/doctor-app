@@ -2,10 +2,13 @@
 
 
 :root {
-  --primary: #4F46E5;
-  --secondary: #0EA5E9;
-  --accent: #F43F5E;
-  --bg-main: #F8F9FD;
+  --primary: #7C3AED;
+  --primary-light: rgba(124, 58, 237, 0.1);
+  --secondary: #C4B5FD;
+  --secondary-light: rgba(196, 181, 253, 0.1);
+  --accent: #06B6D4;
+  --bg-main: #FAFAFF;
+  --text-main: #1F2937;
 }
 
 * {
@@ -88,6 +91,8 @@ body {
 
 /* Utility Classes */
 .bg-primary { background-color: var(--primary) !important; }
+.bg-primary-light { background-color: var(--primary-light) !important; }
+.bg-secondary-light { background-color: var(--secondary-light) !important; }
 .text-primary { color: var(--primary) !important; }
 .border-primary { border-color: var(--primary) !important; }
 

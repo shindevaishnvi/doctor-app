@@ -1,18 +1,20 @@
 import React, { useContext, useEffect } from 'react'
 import { DoctorContext } from '../../context/DoctorContext'
 import { AppContext } from '../../context/AppContext'
-import { CalendarCheck, DollarSign, UserCheck, XCircle, CheckCircle } from 'lucide-react'
+import { CalendarCheck, DollarSign, UserCheck, XCircle, CheckCircle, Video } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const DoctorDashboard = () => {
 
-  const { dToken, dashData, setDashData, getDashData, completeAppointment, cancelAppointment } = useContext(DoctorContext)
+  const navigate = useNavigate()
+  const { dToken, dashData, getDashData, completeAppointment, cancelAppointment } = useContext(DoctorContext)
   const { slotDateFormat, currency } = useContext(AppContext)
 
   useEffect(() => {
     if (dToken) {
       getDashData()
     }
-  }, [dToken])
+  }, [dToken, getDashData])
 
   return dashData && (
     <div className='m-8 space-y-10'>
@@ -84,6 +86,9 @@ const DoctorDashboard = () => {
                       : item.isCompleted
                         ? <span className='px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-500 text-xs font-bold uppercase tracking-widest'>Completed</span>
                         : <div className='flex items-center gap-2'>
+                          <div onClick={() => navigate(`/video-call/${item._id}`)} className='p-3 rounded-xl bg-green-50 text-green-500 hover:bg-green-500 hover:text-white cursor-pointer transition-all shadow-sm'>
+                            <Video size={18} />
+                          </div>
                           <div onClick={() => cancelAppointment(item._id)} className='p-3 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white cursor-pointer transition-all shadow-sm'>
                             <XCircle size={18} />
                           </div>

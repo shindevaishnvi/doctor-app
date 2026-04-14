@@ -1,18 +1,18 @@
 import React, { useContext, useEffect } from 'react'
 import { AdminContext } from '../../context/AdminContext'
 import { AppContext } from '../../context/AppContext'
-import { XCircle } from 'lucide-react'
+import { XCircle, CheckCircle } from 'lucide-react'
 
 const AllAppointments = () => {
 
-  const { aToken, appointments, getAllAppointments, cancelAppointment } = useContext(AdminContext)
+  const { aToken, appointments, getAllAppointments, cancelAppointment, completeAppointment } = useContext(AdminContext)
   const { slotDateFormat, calculateAge, currency } = useContext(AppContext)
 
   useEffect(() => {
     if (aToken) {
       getAllAppointments()
     }
-  }, [aToken])
+  }, [aToken, getAllAppointments])
 
   return (
     <div className='m-8 w-full max-w-7xl'>
@@ -59,13 +59,18 @@ const AllAppointments = () => {
 
               <p className='text-gray-900 font-black text-sm'>{currency}{item.amount}</p>
               
-              <div className='flex justify-end'>
+              <div className='flex justify-end gap-2'>
                 {item.cancelled
                   ? <span className='px-3 py-1 rounded-lg bg-red-50 text-red-500 text-[10px] font-black uppercase tracking-widest'>Cancelled</span>
                   : item.isCompleted
                     ? <span className='px-3 py-1 rounded-lg bg-green-50 text-green-500 text-[10px] font-black uppercase tracking-widest'>Completed</span>
-                    : <div onClick={() => cancelAppointment(item._id)} className='group p-2.5 rounded-xl bg-gray-50 hover:bg-red-500 text-gray-400 hover:text-white cursor-pointer transition-all'>
-                        <XCircle size={18} className='group-hover:rotate-90 transition-transform duration-300' />
+                    : <div className='flex items-center gap-2'>
+                        <div onClick={() => cancelAppointment(item._id)} className='group p-2.5 rounded-xl bg-gray-50 hover:bg-red-500 text-gray-400 hover:text-white cursor-pointer transition-all'>
+                            <XCircle size={18} className='group-hover:rotate-90 transition-transform duration-300' />
+                        </div>
+                        <div onClick={() => completeAppointment(item._id)} className='group p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-500 text-emerald-500 hover:text-white cursor-pointer transition-all'>
+                            <CheckCircle size={18} />
+                        </div>
                       </div>
                 }
               </div>

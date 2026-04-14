@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
-import { Menu, X, User, LogOut, ChevronDown, Bell } from 'lucide-react'
+import { Menu, X, User, LogOut, ChevronDown, Bell, FileText, Activity, Sparkles, Thermometer, Scan } from 'lucide-react'
 
 const Navbar = () => {
     const navigate = useNavigate()
@@ -37,9 +37,13 @@ const Navbar = () => {
                 </div>
 
                 <ul className='hidden md:flex items-center gap-8 font-semibold text-gray-600'>
-                    {['Home', 'Doctors', 'About', 'Contact'].map((item) => (
-                        <NavLink key={item} to={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '-')}`} className='relative group'>
-                            <li className='hover:text-primary transition-colors py-1'>{item}</li>
+                    {['Home', 'Doctors', 'Smart AI', 'Symptoms', 'About', 'Contact'].map((item) => (
+                        <NavLink key={item} to={item === 'Home' ? '/' : item === 'Smart AI' ? '/smart-recommendation' : item === 'Symptoms' ? '/symptom-checker' : `/${item.toLowerCase().replace(' ', '-')}`} className='relative group'>
+                            <li className='hover:text-primary flex items-center gap-1 transition-colors py-1'>
+                                {item === 'Smart AI' && <Sparkles size={14} className="text-primary"/>}
+                                {item === 'Symptoms' && <Thermometer size={14} className="text-gray-400 group-hover:text-primary"/>}
+                                {item}
+                            </li>
                             <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-[.active]:w-full'></span>
                         </NavLink>
                     ))}
@@ -65,6 +69,15 @@ const Navbar = () => {
                                             </div>
                                             <p onClick={() => navigate('my-profile')} className='flex items-center gap-3 px-4 py-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-all cursor-pointer font-medium text-sm text-gray-600'>
                                                 <User size={18} /> My Profile
+                                            </p>
+                                            <p onClick={() => navigate('live-queue')} className='flex items-center gap-3 px-4 py-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-all cursor-pointer font-medium text-sm text-gray-600'>
+                                                <Activity size={18} /> Live Queue
+                                            </p>
+                                            <p onClick={() => navigate('medical-records')} className='flex items-center gap-3 px-4 py-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-all cursor-pointer font-medium text-sm text-gray-600'>
+                                                <FileText size={18} /> Medical Records
+                                            </p>
+                                            <p onClick={() => navigate('scan-prescription')} className='flex items-center gap-3 px-4 py-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-all cursor-pointer font-medium text-sm text-gray-600'>
+                                                <Scan size={18} /> Scan Script
                                             </p>
                                             <p onClick={() => navigate('my-appointments')} className='flex items-center gap-3 px-4 py-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-all cursor-pointer font-medium text-sm text-gray-600'>
                                                 <Bell size={18} /> My Appointments
@@ -98,8 +111,10 @@ const Navbar = () => {
                                 </button>
                             </div>
                             <div className='flex flex-col p-6 gap-2'>
-                                {['Home', 'Doctors', 'About', 'Contact'].map((item) => (
-                                    <NavLink key={item} onClick={() => setShowMenu(false)} to={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '-')}`} className='px-6 py-4 rounded-2xl hover:bg-gray-50 font-semibold text-gray-600 hover:text-primary transition-all'>
+                                {['Home', 'Doctors', 'Smart AI', 'Symptoms', 'About', 'Contact'].map((item) => (
+                                    <NavLink key={item} onClick={() => setShowMenu(false)} to={item === 'Home' ? '/' : item === 'Smart AI' ? '/smart-recommendation' : item === 'Symptoms' ? '/symptom-checker' : `/${item.toLowerCase().replace(' ', '-')}`} className='px-6 py-4 rounded-2xl hover:bg-gray-50 font-semibold text-gray-600 hover:text-primary transition-all flex items-center gap-2'>
+                                        {item === 'Smart AI' && <Sparkles size={16} className="text-primary"/>}
+                                        {item === 'Symptoms' && <Thermometer size={16} className="text-gray-400 group-hover:text-primary"/>}
                                         {item.toUpperCase()}
                                     </NavLink>
                                 ))}

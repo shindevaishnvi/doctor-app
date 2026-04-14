@@ -49,41 +49,65 @@ const MyAppointments = () => {
     }
 
     const initPay = (order) => {
-        const options = {
-            key: process.env.REACT_APP_RAZORPAY_KEY_ID,
-            amount: order.amount,
-            currency: order.currency,
-            name: 'Appointment Payment',
-            description: 'Medical session booking',
-            order_id: order.id,
-            receipt: order.receipt,
-            handler: async (response) => {
-                try {
-                    const { data } = await axios.post(backendUrl + '/api/user/verify-razorpay', response, { headers: { token } })
-                    if (data.success) {
-                        toast.success(data.message)
-                        getUserAppointments()
-                        navigate('/my-appointments')
+        if (!window.Razorpay) {
+            toast.error("Razorpay SDK failed to load. Please check your internet connection.");
+            return;
+        }
+        
+        try {
+            const options = {
+                key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+                amount: order.amount,
+                currency: order.currency,
+                name: 'Appointment Payment',
+                description: 'Medical session booking',
+                order_id: order.id,
+                receipt: order.receipt,
+                handler: async (response) => {
+                    console.log("Razorpay Success Response:", response);
+                    try {
+                        const { data } = await axios.post(backendUrl + '/api/user/verify-razorpay', response, { headers: { token } })
+                        if (data.success) {
+                            toast.success(data.message)
+                            getUserAppointments()
+                            navigate('/my-appointments')
+                        }
+                    } catch (error) {
+                        console.log("Verification Error:", error)
+                        toast.error(error.message)
                     }
-                } catch (error) {
-                    console.log(error)
-                    toast.error(error.message)
                 }
             }
+            console.log("Razorpay Initialization Options:", options);
+            const rzp = new window.Razorpay(options)
+            rzp.open()
+        } catch (error) {
+            console.error("Razorpay Modal Error:", error);
+            toast.error("Error opening payment window: " + error.message);
         }
-        const rzp = new window.Razorpay(options)
-        rzp.open()
     }
+
+    const [isPaying, setIsPaying] = useState(null)
 
     const appointmentRazorpay = async (appointmentId) => {
         try {
+            console.log("Initiating payment at:", backendUrl + '/api/user/payment-razorpay');
+            setIsPaying(appointmentId)
             const { data } = await axios.post(backendUrl + '/api/user/payment-razorpay', { appointmentId }, { headers: { token } })
+            console.log("Server Success Status:", data.success);
+            
             if (data.success) {
+                console.log("Order Data:", data.order);
                 initPay(data.order)
+            } else {
+                console.error("Payment Error Message:", data.message);
+                toast.error(data.message)
             }
         } catch (error) {
-            console.log(error)
+            console.log("Payment Frontend Error:", error)
             toast.error(error.message)
+        } finally {
+            setIsPaying(null)
         }
     }
 
@@ -140,21 +164,31 @@ const MyAppointments = () => {
                         <div className='shrink-0 w-full md:w-auto flex flex-col gap-3'>
                             {!item.cancelled && !item.isCompleted && (
                                 <>
-                                    <button onClick={() => navigate(`/video-call/${item._id}`)} className='bg-green-500 text-white font-bold px-8 py-3 rounded-2xl hover:bg-green-600 transition-all text-sm flex items-center justify-center gap-2'>
-                                        <Video size={18} /> Join Video Call
+                                    <button 
+                                        onClick={() => navigate(`/video-call/${item._id}`)} 
+                                        className={`font-bold px-8 py-3 rounded-2xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg ${item.payment ? 'bg-green-500 text-white hover:bg-green-600 shadow-green-100' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                                    >
+                                        <Video size={18} /> {item.payment ? 'Join Video Call' : 'Join Consultation'}
                                     </button>
+
                                     {!item.payment && (
-                                        <button onClick={() => appointmentRazorpay(item._id)} className='btn-premium !rounded-2xl !py-3 px-8 shadow-sm flex items-center justify-center gap-2 text-sm'>
-                                            <CreditCard size={18} /> Pay Online
+                                        <button 
+                                            disabled={isPaying === item._id}
+                                            onClick={() => appointmentRazorpay(item._id)} 
+                                            className='btn-premium !rounded-2xl !py-3 px-8 shadow-sm flex items-center justify-center gap-2 text-sm disabled:opacity-50'
+                                        >
+                                            <CreditCard size={18} /> {isPaying === item._id ? 'Processing...' : 'Pay Online'}
                                         </button>
                                     )}
+                                    
                                     {item.payment && (
-                                        <div className='px-8 py-3 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-500 text-xs font-black uppercase tracking-widest text-center'>
-                                            Paid
+                                        <div className='px-8 py-2 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-500 text-[10px] font-black uppercase tracking-widest text-center'>
+                                            Payment Verified
                                         </div>
                                     )}
-                                    <button onClick={() => cancelAppointment(item._id)} className='bg-white text-gray-400 font-bold border border-gray-200 px-8 py-3 rounded-2xl hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all text-sm flex items-center justify-center gap-2'>
-                                        <X size={18} /> Cancel
+
+                                    <button onClick={() => cancelAppointment(item._id)} className='bg-white text-gray-400 font-bold border border-gray-200 px-8 py-3 rounded-2xl hover:bg-red-100 hover:text-red-500 hover:border-red-100 transition-all text-sm flex items-center justify-center gap-2'>
+                                        <X size={18} /> Cancel Booking
                                     </button>
                                 </>
                             )}

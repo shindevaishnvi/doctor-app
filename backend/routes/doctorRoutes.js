@@ -1,5 +1,5 @@
 const express = require("express");
-const { addDoctor, loginAdmin, allDoctors, adminDashboard, changeAvailability, appointmentsAdmin, appointmentCancel } = require("../controllers/adminController.js");
+const { addDoctor, loginAdmin, allDoctors, adminDashboard, changeAvailability, appointmentsAdmin, appointmentCancel, appointmentComplete, removeDoctor, updateDoctorCredentials } = require("../controllers/adminController.js");
 const upload = require("../middlewares/multer.js");
 const authAdmin = require("../middlewares/authAdmin.js");
 
@@ -12,6 +12,9 @@ adminRouter.get("/dashboard", authAdmin, adminDashboard);
 adminRouter.post("/change-availability", authAdmin, changeAvailability);
 adminRouter.get("/appointments", authAdmin, appointmentsAdmin);
 adminRouter.post("/cancel-appointment", authAdmin, appointmentCancel);
+adminRouter.post("/complete-appointment", authAdmin, appointmentComplete);
+adminRouter.post("/remove-doctor", authAdmin, removeDoctor);
+adminRouter.post("/update-doctor-credentials", authAdmin, updateDoctorCredentials);
 
 module.exports = adminRouter;
 

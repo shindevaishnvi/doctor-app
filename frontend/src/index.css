@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --primary: #4F46E5; /* Modern Indigo */
-  --primary-hover: #4338CA;
-  --secondary: #0EA5E9; /* Sky Blue */
-  --accent: #F43F5E; /* Rose */
-  --bg-gradient: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
+  --primary: #7C3AED; /* Purple */
+  --primary-hover: #6D28D9;
+  --secondary: #C4B5FD; /* Light Purple */
+  --accent: #06B6D4; /* Cyan */
+  --bg-gradient: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(124, 58, 237, 0.1);
 }
 
 * {
@@ -19,8 +19,8 @@
 }
 
 body {
-  background: #f8fafc;
-  color: #1e293b;
+  background: #FAFAFF;
+  color: #1F2937;
   overflow-x: hidden;
 }
 

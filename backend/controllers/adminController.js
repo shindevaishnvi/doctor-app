@@ -160,5 +160,61 @@ const appointmentCancel = async (req, res) => {
     }
 };
 
-module.exports = { addDoctor, loginAdmin, allDoctors, adminDashboard, changeAvailability, appointmentsAdmin, appointmentCancel };
+// API to mark appointment as completed for admin panel
+const appointmentComplete = async (req, res) => {
+    try {
+        const { appointmentId } = req.body;
+        const appointmentData = await appointmentModel.findById(appointmentId);
+
+        if (appointmentData) {
+            await appointmentModel.findByIdAndUpdate(appointmentId, { isCompleted: true });
+            return res.json({ success: true, message: "Appointment Completed" });
+        } else {
+            return res.json({ success: false, message: "Mark Failed" });
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+// API to update doctor email/password from admin panel
+const updateDoctorCredentials = async (req, res) => {
+    try {
+        const { docId, email, password } = req.body;
+        
+        const updateData = {};
+        if (email) updateData.email = email;
+        if (password) {
+            if (password.length < 8) {
+                return res.json({ success: false, message: "Please enter a strong password" });
+            }
+            const salt = await bcrypt.genSalt(10);
+            updateData.password = await bcrypt.hash(password, salt);
+        }
+
+        await doctorModel.findByIdAndUpdate(docId, updateData);
+        res.json({ success: true, message: "Doctor credentials updated" });
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+// API to remove doctor for admin panel
+const removeDoctor = async (req, res) => {
+    try {
+        const { docId } = req.body;
+        await doctorModel.findByIdAndDelete(docId);
+        res.json({ success: true, message: "Doctor Removed" });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { addDoctor, loginAdmin, allDoctors, adminDashboard, changeAvailability, appointmentsAdmin, appointmentCancel, appointmentComplete, removeDoctor, updateDoctorCredentials };
+
 
