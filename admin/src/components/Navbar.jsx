@@ -3,6 +3,7 @@ import { AdminContext } from '../context/AdminContext'
 import { DoctorContext } from '../context/DoctorContext'
 import { useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Users, UserPlus, ListTodo, LogOut } from 'lucide-react'
+import AdminNotificationBell from './AdminNotificationBell'
 
 const Navbar = () => {
     const { aToken, setAToken } = useContext(AdminContext)
@@ -32,12 +33,15 @@ const Navbar = () => {
                 </div>
             </div>
             
-            <button 
-                onClick={logout} 
-                className='btn-premium !py-2.5 !px-6 !rounded-xl !text-sm flex items-center gap-2 shadow-lg hover:shadow-primary/20'
-            >
-                <LogOut size={16} /> Logout
-            </button>
+            <div className='flex items-center'>
+                <AdminNotificationBell />
+                <button 
+                    onClick={logout} 
+                    className='btn-premium !py-2.5 !px-6 !rounded-xl !text-sm flex items-center gap-2 shadow-lg hover:shadow-primary/20'
+                >
+                    <LogOut size={16} /> Logout
+                </button>
+            </div>
         </div>
     )
 }

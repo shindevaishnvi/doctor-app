@@ -64,13 +64,11 @@ const Appointment = () => {
 
                 const isSlotAvailable = docInfo.slots_booked?.[slotDate] && docInfo.slots_booked[slotDate].includes(slotTime) ? false : true
 
-                if (isSlotAvailable) {
-                    // add slot to array
-                    timeSlots.push({
-                        datetime: new Date(currentDate),
-                        time: formattedTime
-                    })
-                }
+                timeSlots.push({
+                    datetime: new Date(currentDate),
+                    time: formattedTime,
+                    isAvailable: isSlotAvailable
+                })
 
                 // Increment current time by 30 minutes
                 currentDate.setMinutes(currentDate.getMinutes() + 30)
@@ -226,9 +224,15 @@ const Appointment = () => {
                                 <div className='grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4'>
                                     {docSlots.length > 0 && docSlots[slotIndex].map((item, index) => (
                                         <div 
-                                            onClick={() => setSlotTime(item.time)} 
+                                            onClick={() => item.isAvailable && setSlotTime(item.time)} 
                                             key={index} 
-                                            className={`text-sm font-black py-4 rounded-2xl cursor-pointer text-center transition-all duration-300 border ${item.time === slotTime ? 'bg-indigo-950 text-white border-indigo-950 shadow-xl' : 'bg-gray-50/50 text-gray-500 border-transparent hover:border-primary hover:text-primary hover:bg-white'}`}
+                                            className={`text-sm font-black py-4 rounded-2xl text-center transition-all duration-300 border ${
+                                                !item.isAvailable
+                                                ? 'bg-red-50 text-red-300 cursor-not-allowed border-transparent'
+                                                : item.time === slotTime 
+                                                    ? 'bg-indigo-950 text-white border-indigo-950 shadow-xl cursor-pointer' 
+                                                    : 'bg-gray-50/50 text-gray-500 border-transparent hover:border-primary hover:text-primary hover:bg-white cursor-pointer'
+                                            }`}
                                         >
                                             {item.time.toLowerCase()}
                                         </div>

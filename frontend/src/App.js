@@ -19,6 +19,7 @@ import LiveQueue from './pages/LiveQueue'
 import SmartRecommendation from './pages/SmartRecommendation'
 import SymptomChecker from './pages/SymptomChecker'
 import HandwritingReader from './pages/HandwritingReader'
+import BloodHub from './pages/BloodHub'
 
 const App = () => {
   return (
@@ -41,6 +42,7 @@ const App = () => {
         <Route path='/smart-recommendation' element={<SmartRecommendation />} />
         <Route path='/symptom-checker' element={<SymptomChecker />} />
         <Route path='/scan-prescription' element={<HandwritingReader />} />
+        <Route path='/blood-hub' element={<BloodHub />} />
       </Routes>
       <Chatbot />
       <Footer />

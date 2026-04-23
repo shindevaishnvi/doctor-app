@@ -6,6 +6,9 @@ const cloudinary = require("cloudinary").v2;
 const doctorModel = require("../models/Doctor.js");
 const appointmentModel = require("../models/Appointment.js");
 const MedicalRecord = require("../models/MedicalRecord.js");
+const BloodDonor = require("../models/BloodDonor.js");
+const Notification = require("../models/Notification.js");
+const transporter = require("../config/nodemailer.js");
 let Razorpay = require("razorpay");
 const crypto = require("crypto");
 
@@ -137,6 +140,72 @@ const bookAppointment = async (req, res) => {
 
         // save new slots data in docData
         await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+
+        // --- Create In-App Notifications ---
+        try {
+            await Notification.create({
+                userId: userId,
+                message: `Your appointment is confirmed with Dr. ${docData.name} on ${slotDate.replace(/_/g, '/')} at ${slotTime}.`
+            });
+
+            await Notification.create({
+                docId: docId,
+                message: `New appointment scheduled with ${userData.name} on ${slotDate.replace(/_/g, '/')} at ${slotTime}.`
+            });
+        } catch (notifError) {
+            console.error("Error creating notifications: ", notifError);
+        }
+
+        // Instantly send a confirmation email!
+        try {
+            // 1. Send email to Patient
+            if (userData.email) {
+                const mailOptionsPatient = {
+                    from: process.env.EMAIL_USER,
+                    to: userData.email,
+                    subject: 'Appointment Booking Confirmed ✅',
+                    html: `
+                        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                            <h2 style="color: #10b981;">Booking Confirmed!</h2>
+                            <p>Hi <b>${userData.name}</b>,</p>
+                            <p>Your appointment has been successfully booked with <b>Dr. ${docData.name}</b>.</p>
+                            <ul>
+                                <li><b>Date:</b> ${slotDate.replace(/_/g, '/')}</li>
+                                <li><b>Time:</b> ${slotTime}</li>
+                                <li><b>Speciality:</b> ${docData.speciality}</li>
+                            </ul>
+                            <p>Thank you for choosing QuickCare.</p>
+                        </div>
+                    `
+                };
+                transporter.sendMail(mailOptionsPatient);
+            }
+
+            // 2. Send email to Doctor
+            if (docData.email) {
+                const mailOptionsDoctor = {
+                    from: process.env.EMAIL_USER,
+                    to: docData.email,
+                    subject: 'New Appointment Scheduled 📅',
+                    html: `
+                        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                            <h2 style="color: #3b82f6;">New Appointment Alert!</h2>
+                            <p>Hi <b>Dr. ${docData.name}</b>,</p>
+                            <p>You have a new appointment scheduled with <b>${userData.name}</b>.</p>
+                            <ul>
+                                <li><b>Date:</b> ${slotDate.replace(/_/g, '/')}</li>
+                                <li><b>Time:</b> ${slotTime}</li>
+                                <li><b>Patient Contact:</b> ${userData.phone || userData.email}</li>
+                            </ul>
+                            <p>Please check your dashboard for more details.</p>
+                        </div>
+                    `
+                };
+                transporter.sendMail(mailOptionsDoctor);
+            }
+        } catch (emailError) {
+            console.error("Email sending failed after booking: ", emailError);
+        }
 
         res.json({ success: true, message: "Appointment Booked" });
 
@@ -391,5 +460,96 @@ const getLiveQueue = async (req, res) => {
     }
 }
 
-module.exports = { registerUser, loginUser, getProfile, bookAppointment, listAppointment, cancelAppointment, updateProfile, paymentRazorpay, verifyRazorpay, addMedicalRecord, getMedicalRecords, deleteMedicalRecord, getLiveQueue };
+// API to register as blood donor
+const registerBloodDonor = async (req, res) => {
+    try {
+        const { userId, name, bloodGroup, city, phone } = req.body;
+        
+        let existingDonor = await BloodDonor.findOne({ userId });
+        if (existingDonor) {
+            existingDonor.bloodGroup = bloodGroup;
+            existingDonor.city = city;
+            existingDonor.phone = phone;
+            existingDonor.available = true;
+            await existingDonor.save();
+            return res.json({ success: true, message: "Donor Profile Updated" });
+        }
+        
+        const newDonor = new BloodDonor({ userId, name, bloodGroup, city, phone });
+        await newDonor.save();
+        res.json({ success: true, message: "Successfully Registered as Blood Donor" });
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// API to get all available blood donors
+const getBloodDonors = async (req, res) => {
+    try {
+        const filters = { available: true };
+        if (req.query.bloodGroup) filters.bloodGroup = req.query.bloodGroup;
+        if (req.query.city) {
+            // Case-insensitive regex match for city
+            filters.city = { $regex: new RegExp(`^${req.query.city}$`, 'i') };
+        }
+        
+        const donors = await BloodDonor.find(filters).select('-userId');
+        res.json({ success: true, donors });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// API to toggle donor status
+const toggleDonorStatus = async (req, res) => {
+    try {
+        const { userId, available } = req.body;
+        await BloodDonor.findOneAndUpdate({ userId }, { available });
+        res.json({ success: true, message: "Donor Availability Updated" });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// API to check donor status
+const getMyDonorStatus = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const donor = await BloodDonor.findOne({ userId });
+        res.json({ success: true, donor });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// API to get notifications
+const getNotifications = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const notifications = await Notification.find({ userId }).sort({ date: -1 });
+        res.json({ success: true, notifications });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// API to mark notifications as read
+const markNotificationsAsRead = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        await Notification.updateMany({ userId, isRead: false }, { isRead: true });
+        res.json({ success: true, message: "Notifications marked as read" });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+module.exports = { registerUser, loginUser, getProfile, bookAppointment, listAppointment, cancelAppointment, updateProfile, paymentRazorpay, verifyRazorpay, addMedicalRecord, getMedicalRecords, deleteMedicalRecord, getLiveQueue, registerBloodDonor, getBloodDonors, toggleDonorStatus, getMyDonorStatus, getNotifications, markNotificationsAsRead };
 

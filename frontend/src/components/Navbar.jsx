@@ -1,7 +1,8 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
-import { Menu, X, User, LogOut, ChevronDown, Bell, FileText, Activity, Sparkles, Thermometer, Scan } from 'lucide-react'
+import { Menu, X, User, LogOut, ChevronDown, Bell, FileText, Activity, Sparkles, Thermometer, Scan, Droplet } from 'lucide-react'
+import NotificationBell from './NotificationBell'
 
 const Navbar = () => {
     const navigate = useNavigate()
@@ -37,11 +38,12 @@ const Navbar = () => {
                 </div>
 
                 <ul className='hidden md:flex items-center gap-8 font-semibold text-gray-600'>
-                    {['Home', 'Doctors', 'Smart AI', 'Symptoms', 'About', 'Contact'].map((item) => (
-                        <NavLink key={item} to={item === 'Home' ? '/' : item === 'Smart AI' ? '/smart-recommendation' : item === 'Symptoms' ? '/symptom-checker' : `/${item.toLowerCase().replace(' ', '-')}`} className='relative group'>
+                    {['Home', 'Doctors', 'Smart AI', 'Symptoms', 'Blood Hub', 'About', 'Contact'].map((item) => (
+                        <NavLink key={item} to={item === 'Home' ? '/' : item === 'Smart AI' ? '/smart-recommendation' : item === 'Symptoms' ? '/symptom-checker' : item === 'Blood Hub' ? '/blood-hub' : `/${item.toLowerCase().replace(' ', '-')}`} className='relative group'>
                             <li className='hover:text-primary flex items-center gap-1 transition-colors py-1'>
                                 {item === 'Smart AI' && <Sparkles size={14} className="text-primary"/>}
                                 {item === 'Symptoms' && <Thermometer size={14} className="text-gray-400 group-hover:text-primary"/>}
+                                {item === 'Blood Hub' && <Droplet size={14} className="text-red-500"/>}
                                 {item}
                             </li>
                             <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-[.active]:w-full'></span>
@@ -53,9 +55,7 @@ const Navbar = () => {
                     {
                         token && userData
                             ? <div className='flex items-center gap-4'>
-                                <button className='hidden lg:block text-gray-500 hover:text-primary p-2 rounded-full hover:bg-gray-100 transition-all'>
-                                    <Bell size={20} />
-                                </button>
+                                <NotificationBell />
                                 <div className='flex items-center gap-2 cursor-pointer group relative bg-gray-50 p-1 pr-3 rounded-full border border-gray-100 hover:border-primary/30 transition-all'>
                                     <img className='w-9 h-9 rounded-full object-cover border-2 border-white' src={userData.image || 'https://img.freepik.com/free-vector/user-blue-gradient_78370-4692.jpg'} alt="" />
                                     <p className='hidden sm:block text-sm font-semibold text-gray-700'>{userData.name?.split(' ')[0] || 'User'}</p>
@@ -111,10 +111,11 @@ const Navbar = () => {
                                 </button>
                             </div>
                             <div className='flex flex-col p-6 gap-2'>
-                                {['Home', 'Doctors', 'Smart AI', 'Symptoms', 'About', 'Contact'].map((item) => (
-                                    <NavLink key={item} onClick={() => setShowMenu(false)} to={item === 'Home' ? '/' : item === 'Smart AI' ? '/smart-recommendation' : item === 'Symptoms' ? '/symptom-checker' : `/${item.toLowerCase().replace(' ', '-')}`} className='px-6 py-4 rounded-2xl hover:bg-gray-50 font-semibold text-gray-600 hover:text-primary transition-all flex items-center gap-2'>
+                                {['Home', 'Doctors', 'Smart AI', 'Symptoms', 'Blood Hub', 'About', 'Contact'].map((item) => (
+                                    <NavLink key={item} onClick={() => setShowMenu(false)} to={item === 'Home' ? '/' : item === 'Smart AI' ? '/smart-recommendation' : item === 'Symptoms' ? '/symptom-checker' : item === 'Blood Hub' ? '/blood-hub' : `/${item.toLowerCase().replace(' ', '-')}`} className='px-6 py-4 rounded-2xl hover:bg-gray-50 font-semibold text-gray-600 hover:text-primary transition-all flex items-center gap-2'>
                                         {item === 'Smart AI' && <Sparkles size={16} className="text-primary"/>}
                                         {item === 'Symptoms' && <Thermometer size={16} className="text-gray-400 group-hover:text-primary"/>}
+                                        {item === 'Blood Hub' && <Droplet size={16} className="text-red-500"/>}
                                         {item.toUpperCase()}
                                     </NavLink>
                                 ))}

@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 const connectDB = require("./config/mongodb.js");
 const connectCloudinary = require("./config/cloudinary.js");
+const startCronJobs = require("./services/cronService.js");
 const adminRouter = require("./routes/doctorRoutes.js"); // Using doctorRoutes.js as adminRouter as refactored above
 const doctorRouter = require("./routes/doctorRoute.js");
 const userRouter = require("./routes/userRoutes.js");
@@ -12,6 +13,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 connectDB();
 connectCloudinary();
+startCronJobs();
 
 // middlewares
 app.use(express.json());

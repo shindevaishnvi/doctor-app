@@ -21,28 +21,91 @@ const HandwritingReader = () => {
         }
     };
 
-    const handleScan = () => {
+    const preprocessImage = (file) => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    // Scale up by 2x for better OCR readability
+                    const scale = 2;
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+
+                    // Use good interpolation
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+
+                    // Preprocess: Grayscale and Adaptive Contrast
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i];
+                        const g = data[i + 1];
+                        const b = data[i + 2];
+
+                        // Grayscale
+                        let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+
+                        // Increase Contrast: push lighter grays to white, darker grays to black
+                        // This helps capture faint handwriting
+                        gray = (gray - 160) * 2.5 + 160;
+
+                        // Clamp values
+                        if (gray > 255) gray = 255;
+                        if (gray < 0) gray = 0;
+
+                        data[i] = data[i + 1] = data[i + 2] = gray;
+                    }
+
+                    ctx.putImageData(imageData, 0, 0);
+                    resolve(canvas.toDataURL('image/png', 1.0));
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleScan = async () => {
         if (!selectedImage) return;
 
         setStatus('processing');
-        Tesseract.recognize(
-            selectedImage,
-            'eng',
-            {
+        setProgress(0);
+
+        try {
+            const processedImageDataUrl = await preprocessImage(selectedImage);
+
+            const worker = await Tesseract.createWorker('eng', 1, {
                 logger: m => {
                     if (m.status === 'recognizing text') {
                         setProgress(Math.round(m.progress * 100));
                     }
                 }
-            }
-        ).then(({ data: { text } }) => {
+            });
+
+            await worker.setParameters({
+                tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK, // Better for structured lists like prescriptions
+                tessjs_create_hocr: '0',
+                tessjs_create_tsv: '0',
+            });
+
+            const { data: { text } } = await worker.recognize(processedImageDataUrl);
+            await worker.terminate();
+
             setOcrText(text);
             setStatus('done');
-        }).catch(err => {
+        } catch (err) {
             console.error(err);
             setStatus('done');
-            setOcrText("Error scanning the image. Please try again with a clearer picture.");
-        });
+            setOcrText("Error scanning the image. Please try again with a clearer, well-lit picture.");
+        }
     };
 
     return (
@@ -62,15 +125,15 @@ const HandwritingReader = () => {
                         <Upload size={20} className='text-primary' /> Upload Image
                     </h2>
 
-                    <input 
-                        type="file" 
-                        accept="image/*" 
-                        ref={fileInputRef} 
-                        onChange={handleImageChange} 
-                        className="hidden" 
+                    <input
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        className="hidden"
                     />
 
-                    <div 
+                    <div
                         onClick={() => fileInputRef.current.click()}
                         className='flex-1 border-2 border-dashed border-primary/30 rounded-xl bg-gray-50 flex flex-col items-center justify-center p-8 cursor-pointer hover:bg-gray-100 hover:border-primary transition-all text-center min-h-[250px]'
                     >
@@ -86,7 +149,7 @@ const HandwritingReader = () => {
                     </div>
 
                     <div className='mt-6'>
-                        <button 
+                        <button
                             onClick={handleScan}
                             disabled={!selectedImage || status === 'processing'}
                             className='w-full bg-gray-900 text-white py-3 rounded-xl font-semibold flex flex-row justify-center items-center gap-2 hover:bg-gray-800 transition disabled:opacity-50'
@@ -113,8 +176,16 @@ const HandwritingReader = () => {
                                 <p className='text-sm text-gray-500 mt-2 font-medium'>Decoding Handwriting... {progress}%</p>
                             </div>
                         ) : ocrText ? (
-                            <div className='whitespace-pre-wrap text-gray-700 font-mono text-sm leading-relaxed overflow-y-auto max-h-[300px]'>
-                                {ocrText}
+                            <div className='flex flex-col h-full'>
+                                <div className='flex-1 whitespace-pre-wrap text-gray-800 font-medium text-base leading-relaxed overflow-y-auto max-h-[250px] bg-white p-4 rounded-lg border border-gray-100 shadow-inner'>
+                                    {ocrText}
+                                </div>
+                                <div className='mt-4 pt-4 border-t border-gray-200 flex items-start gap-2 text-amber-600 bg-amber-50/50 p-3 rounded-lg'>
+                                    <AlertCircle size={16} className='shrink-0 mt-0.5' />
+                                    <p className='text-[10px] font-medium leading-tight'>
+                                        Handwriting recognition can be imprecise. Please cross-verify this text with your physical prescription before making any medical decisions.
+                                    </p>
+                                </div>
                             </div>
                         ) : (
                             <div className='h-full flex flex-col items-center justify-center opacity-40 text-center px-4'>

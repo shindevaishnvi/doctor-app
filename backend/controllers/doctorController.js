@@ -2,6 +2,7 @@ const doctorModel = require("../models/Doctor.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const appointmentModel = require("../models/Appointment.js");
+const Notification = require("../models/Notification.js");
 
 // API for doctor login
 const loginDoctor = async (req, res) => {
@@ -148,6 +149,30 @@ const doctorList = async (req, res) => {
     }
 };
 
-module.exports = { loginDoctor, appointmentsDoctor, doctorProfile, appointmentComplete, appointmentCancel, doctorDashboard, updateDoctorProfile, doctorList };
+// API to get notifications for doctor
+const getNotifications = async (req, res) => {
+    try {
+        const { docId } = req.body;
+        const notifications = await Notification.find({ docId }).sort({ date: -1 });
+        res.json({ success: true, notifications });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+// API to mark notifications as read for doctor
+const markNotificationsAsRead = async (req, res) => {
+    try {
+        const { docId } = req.body;
+        await Notification.updateMany({ docId, isRead: false }, { isRead: true });
+        res.json({ success: true, message: "Notifications marked as read" });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { loginDoctor, appointmentsDoctor, doctorProfile, appointmentComplete, appointmentCancel, doctorDashboard, updateDoctorProfile, doctorList, getNotifications, markNotificationsAsRead };
 
 
