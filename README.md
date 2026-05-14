@@ -31,3 +31,8 @@ To get the project running locally, you'll need to install dependencies and conf
 - Doctor search and filtering.
 - Appointment booking and management.
 - Admin dashboard for platform management.
+
+## Author
+**Vaishnavi Shinde**
+- GitHub: [shindevaishnvi](https://github.com/shindevaishnvi)
+- Email: shindevaishnvi3@gmail.com
