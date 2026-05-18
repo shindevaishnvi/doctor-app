@@ -31,6 +31,7 @@ To get the project running locally, you'll need to install dependencies and conf
 - Doctor search and filtering.
 - Appointment booking and management.
 - Admin dashboard for platform management.
+- AI fechures
 
 ## Author
 **Vaishnavi Shinde**
