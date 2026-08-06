@@ -39,10 +39,10 @@ const registerUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const userData = { 
-            name, 
-            email, 
-            password: hashedPassword 
+        const userData = {
+            name,
+            email,
+            password: hashedPassword
         };
 
         const newUser = new userModel(userData);
@@ -178,7 +178,7 @@ const bookAppointment = async (req, res) => {
                         </div>
                     `
                 };
-                transporter.sendMail(mailOptionsPatient);
+                transporter.sendMail(mailOptionsPatient).catch(err => console.log('Email Error:', err));
             }
 
             // 2. Send email to Doctor
@@ -201,7 +201,7 @@ const bookAppointment = async (req, res) => {
                         </div>
                     `
                 };
-                transporter.sendMail(mailOptionsDoctor);
+                transporter.sendMail(mailOptionsDoctor).catch(err => console.log('Email Error:', err));
             }
         } catch (emailError) {
             console.error("Email sending failed after booking: ", emailError);
@@ -288,7 +288,7 @@ const updateProfile = async (req, res) => {
 const paymentRazorpay = async (req, res) => {
     try {
         const { appointmentId } = req.body;
-        
+
         if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
             console.error("CRITICAL: Razorpay credentials missing from .env");
             return res.json({ success: false, message: "Razopay credentials are missing in backend .env" });
@@ -341,7 +341,7 @@ const verifyRazorpay = async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
         console.log("Verifying Payment - Order ID:", razorpay_order_id);
-        
+
         // Verifying the signature
         const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
         hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
@@ -375,14 +375,14 @@ const addMedicalRecord = async (req, res) => {
     try {
         const { userId, title, description } = req.body;
         const file = req.file;
-        
+
         if (!title || !file) {
             return res.json({ success: false, message: "Title and File are required" });
         }
-        
+
         const fileUpload = await cloudinary.uploader.upload(file.path, { resource_type: "auto" });
         const fileUrl = fileUpload.secure_url;
-        
+
         const newRecord = new MedicalRecord({
             userId,
             title,
@@ -390,10 +390,10 @@ const addMedicalRecord = async (req, res) => {
             fileUrl,
             date: Date.now()
         });
-        
+
         await newRecord.save();
         res.json({ success: true, message: "Record Added Successfully" });
-        
+
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });
@@ -417,11 +417,11 @@ const deleteMedicalRecord = async (req, res) => {
     try {
         const { userId, recordId } = req.body;
         const record = await MedicalRecord.findById(recordId);
-        
+
         if (record.userId !== userId) {
             return res.json({ success: false, message: "Unauthorized action" });
         }
-        
+
         await MedicalRecord.findByIdAndDelete(recordId);
         res.json({ success: true, message: "Record Deleted" });
     } catch (error) {
@@ -435,24 +435,24 @@ const getLiveQueue = async (req, res) => {
     try {
         const { userId } = req.body;
         const userAppointments = await appointmentModel.find({ userId, cancelled: false, isCompleted: false });
-        
+
         const liveQueueData = [];
         for (const appt of userAppointments) {
             const { docId, slotDate } = appt;
             const sameDayAppts = await appointmentModel.find({ docId, slotDate, cancelled: false, isCompleted: false });
-            
+
             // Sorting simply by 'slotTime' string. Ensure correct format if possible.
             const sorted = sameDayAppts.sort((a, b) => a.slotTime.localeCompare(b.slotTime));
-            
+
             const position = sorted.findIndex(a => a._id.toString() === appt._id.toString()) + 1;
-            
+
             liveQueueData.push({
                 appointment: appt,
                 position,
                 totalPending: sorted.length
             });
         }
-        
+
         res.json({ success: true, liveQueueData });
     } catch (error) {
         console.log(error);
@@ -464,7 +464,7 @@ const getLiveQueue = async (req, res) => {
 const registerBloodDonor = async (req, res) => {
     try {
         const { userId, name, bloodGroup, city, phone } = req.body;
-        
+
         let existingDonor = await BloodDonor.findOne({ userId });
         if (existingDonor) {
             existingDonor.bloodGroup = bloodGroup;
@@ -474,7 +474,7 @@ const registerBloodDonor = async (req, res) => {
             await existingDonor.save();
             return res.json({ success: true, message: "Donor Profile Updated" });
         }
-        
+
         const newDonor = new BloodDonor({ userId, name, bloodGroup, city, phone });
         await newDonor.save();
         res.json({ success: true, message: "Successfully Registered as Blood Donor" });
@@ -494,7 +494,7 @@ const getBloodDonors = async (req, res) => {
             // Case-insensitive regex match for city
             filters.city = { $regex: new RegExp(`^${req.query.city}$`, 'i') };
         }
-        
+
         const donors = await BloodDonor.find(filters).select('-userId');
         res.json({ success: true, donors });
     } catch (error) {

@@ -15,7 +15,7 @@ const VideoCall = () => {
 
     const myMeeting = React.useCallback(async (element) => {
         if (!element) return;
-        
+
         const appID = Number(import.meta.env.VITE_ZEGO_APP_ID);
         const serverSecret = import.meta.env.VITE_ZEGO_SERVER_SECRET;
 
@@ -29,13 +29,13 @@ const VideoCall = () => {
             `;
             return;
         }
-        
+
         const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
             appID,
             serverSecret,
             id, // roomID
-            profileData ? profileData._id : Date.now().toString(), // userID
-            profileData ? profileData.name : "Medical Specialist" // userName
+            profileData && profileData._id ? String(profileData._id) : Date.now().toString(), // userID
+            profileData && profileData.name ? profileData.name : "Medical Specialist" // userName
         );
 
         // Create instance object from Kit Token.
@@ -70,11 +70,11 @@ const VideoCall = () => {
 
     return (
         <div className='min-h-[80vh] w-full flex flex-col items-center justify-center p-8 bg-gray-50/30'>
-             <div className='w-full max-w-7xl aspect-video glass-card rounded-[3rem] overflow-hidden shadow-2xl bg-black border-8 border-white' ref={myMeeting}></div>
-             <div className='mt-8 flex items-center gap-4 bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100'>
+            <div className='w-full max-w-7xl aspect-video glass-card rounded-[3rem] overflow-hidden shadow-2xl bg-black border-8 border-white' ref={myMeeting}></div>
+            <div className='mt-8 flex items-center gap-4 bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100'>
                 <div className='w-2 h-2 rounded-full bg-red-500 animate-pulse'></div>
                 <p className='text-gray-900 font-black text-sm uppercase tracking-widest'>Encryption Active • HIPAA Compliant</p>
-             </div>
+            </div>
         </div>
     )
 }

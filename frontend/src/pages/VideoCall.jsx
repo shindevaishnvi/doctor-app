@@ -23,13 +23,13 @@ const VideoCall = () => {
             `;
             return;
         }
-        
+
         const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
             appID,
             serverSecret,
             id, // roomID
-            userData ? userData._id : Date.now().toString(), // userID
-            userData ? userData.name : "Guest User" // userName
+            userData && userData._id ? String(userData._id) : Date.now().toString(), // userID
+            userData && userData.name ? userData.name : "Guest User" // userName
         );
 
         // Create instance object from Kit Token.
